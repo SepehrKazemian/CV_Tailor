@@ -1,0 +1,20 @@
+# Core dependencies
+python-docx>=0.8.11
+langchain>=0.1.0
+pydantic>=2.0.0
+
+# LLM providers
+langchain-openai>=0.0.5
+langchain-google-genai>=0.0.5
+langchain-anthropic>=0.0.5
+
+# Text processing
+regex>=2023.0.0
+
+# Testing
+pytest>=7.0.0
+
+# Utilities
+python-dotenv>=1.0.0
+tqdm>=4.65.0
+PyYAML>=6.0 # Added for reading experience.yml

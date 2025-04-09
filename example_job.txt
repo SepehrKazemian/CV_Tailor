@@ -1,0 +1,48 @@
+Job Title: Senior Machine Learning Engineer
+
+Company: TechInnovate AI
+
+Location: Remote (US-based)
+
+About Us:
+TechInnovate AI is a leading AI solutions provider specializing in developing cutting-edge machine learning applications for enterprise clients. We're looking for a talented Senior Machine Learning Engineer to join our growing team.
+
+Job Description:
+We are seeking an experienced Machine Learning Engineer to design, develop, and deploy production-grade ML systems. The ideal candidate will have a strong background in machine learning, deep learning, and software engineering, with experience building and deploying models at scale.
+
+Responsibilities:
+- Design and implement machine learning models and algorithms to solve complex business problems
+- Build and maintain scalable ML pipelines for training, evaluation, and deployment
+- Collaborate with cross-functional teams to understand requirements and translate them into technical solutions
+- Optimize existing ML systems for performance, scalability, and reliability
+- Implement best practices for ML/MLOps, including monitoring, testing, and documentation
+- Mentor junior engineers and contribute to the team's technical growth
+- Stay current with the latest research and technologies in ML/AI
+
+Requirements:
+- 5+ years of experience in machine learning engineering or related field
+- Strong programming skills in Python and experience with ML frameworks (PyTorch or TensorFlow)
+- Experience with cloud platforms (AWS preferred) and containerization (Docker, Kubernetes)
+- Knowledge of data processing frameworks (Spark, Pandas) and databases (SQL, NoSQL)
+- Experience with MLOps tools and practices (MLflow, Kubeflow, or similar)
+- Familiarity with NLP and LLM technologies is a plus
+- Strong problem-solving skills and attention to detail
+- Excellent communication and collaboration abilities
+- BS/MS/PhD in Computer Science, Machine Learning, or related field
+
+Nice to Have:
+- Experience with LangChain, LlamaIndex, or similar LLM frameworks
+- Knowledge of vector databases and RAG systems
+- Experience with real-time ML systems and streaming data
+- Contributions to open-source ML projects
+- Experience with CI/CD pipelines and DevOps practices
+
+Benefits:
+- Competitive salary and equity
+- Comprehensive health, dental, and vision insurance
+- Flexible work schedule and remote-first culture
+- Professional development budget
+- Home office stipend
+- 401(k) matching
+
+TechInnovate AI is an equal opportunity employer. We celebrate diversity and are committed to creating an inclusive environment for all employees.
