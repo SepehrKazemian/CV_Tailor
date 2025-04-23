@@ -2,6 +2,9 @@ from typing import Dict, List, Set, Any
 from resume_tailor.utils.prompt_templates import PAGE_LIMIT_PROMPT
 from resume_tailor.utils.llm_utils import run_llm_chain
 import logging
+import re
+import json # Added for potential use, though not strictly needed by extract_json_block itself
+from typing import Optional # Added for type hint
 
 logger = logging.getLogger(__name__)
 
@@ -129,3 +132,22 @@ def find_missing_keywords(
     missing = job_set - cv_set
     logger.info(f"Found {len(missing)} missing keywords between job and CV.")
     return missing
+
+
+# --- Utility Function moved from skills_tailor/experience_tailor ---
+def extract_json_block(text: str) -> Optional[str]:
+    """Extracts the first JSON block (between { and }) from a string."""
+    # Look for JSON starting with { and ending with }
+    # Handle potential markdown fences ```json ... ```
+    text = text.strip()
+    if text.startswith("```json"):
+        text = text[7:]
+    if text.endswith("```"):
+        text = text[:-3]
+    text = text.strip()
+
+    match = re.search(r'\{.*\}', text, re.DOTALL)
+    if match:
+        return match.group(0)
+    logger.warning("Could not find JSON block in text.") # Use logger from this module
+    return None

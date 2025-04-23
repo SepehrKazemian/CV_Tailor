@@ -14,6 +14,8 @@ from resume_tailor.utils.llm_utils import run_llm_chain
 #     EXP_STEP2_RETRY_PROMPT # Implicitly via tool call feedback
 # )
 from resume_tailor.utils.file_utils import format_experience_output # For final formatting
+# Import utilities from tailor_utils
+from resume_tailor.tailors.tailor_utils import extract_json_block
 
 # Configure logging for this module
 log_file = "experience_refinement.log"
@@ -30,21 +32,6 @@ if not root_logger_for_setup.handlers:
      handler.setFormatter(formatter)
      root_logger_for_setup.addHandler(handler)
      root_logger_for_setup.setLevel(logging.INFO)
-
-# --- Utility Function ---
-def extract_json_block(text: str) -> Optional[str]:
-    """Extracts the first JSON block (between { and }) from a string."""
-    text = text.strip()
-    if text.startswith("```json"):
-        text = text[7:]
-    if text.endswith("```"):
-        text = text[:-3]
-    text = text.strip()
-    match = re.search(r'\{.*\}', text, re.DOTALL)
-    if match:
-        return match.group(0)
-    logging.warning("Could not find JSON block in text.") # Use logging
-    return None
 
 # --- Pydantic Models for Judge Tool ---
 class ExperienceJudgeEvaluation(BaseModel):

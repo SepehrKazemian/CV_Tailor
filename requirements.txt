@@ -4,6 +4,7 @@ langchain>=0.1.0
 pydantic>=2.0.0
 
 # LLM providers
+openai>=1.0.0 # Added dependency
 langchain-openai>=0.0.5
 langchain-google-genai>=0.0.5
 langchain-anthropic>=0.0.5
@@ -13,6 +14,11 @@ regex>=2023.0.0
 
 # Testing
 pytest>=7.0.0
+
+# Graph & Embeddings
+neo4j>=5.10.0 # Check for latest compatible version
+sentence-transformers>=2.2.0 # Check for latest compatible version
+scikit-learn>=1.0 # For cosine similarity, check latest compatible version
 
 # Utilities
 python-dotenv>=1.0.0

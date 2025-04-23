@@ -32,41 +32,57 @@ def pydantic_model_to_schema(model: BaseModel) -> Dict[str, Any]:
     }
 
 
-def get_schema_type(field_type, description: str) -> Dict[str, Any]:
-    """
-    Returns a JSON Schema representation for a single field.
-    """
+def get_schema_type(field_type, description: str = None) -> Dict[str, Any]:
     origin = get_origin(field_type)
 
     if origin in (list, List):
         item_type = get_args(field_type)[0]
-        return {
-            "type": "array",
-            "items": get_schema_type(item_type, ""),
-            "description": description,
+        result = {
+            "type": "array"
         }
+        if description:
+            result["description"] = description  # ✅ description comes right after "type"
+        result["items"] = get_schema_type(item_type)
+        return result
+
+    elif origin in (dict, Dict):
+        key_type, value_type = get_args(field_type)
+        result = {
+            "type": "object"
+        }
+        if description:
+            result["description"] = description
+        result["additionalProperties"] = get_schema_type(value_type)
+        return result
 
     elif isinstance(field_type, type) and issubclass(field_type, Enum):
-        return {
+        result = {
             "type": "string",
-            "enum": [e.value for e in field_type],
-            "description": description,
+            "enum": [e.value for e in field_type]
         }
+        if description:
+            result["description"] = description
+        return result
 
     elif isinstance(field_type, type) and issubclass(field_type, BaseModel):
-        # Recursively generate schema for nested models
-        return pydantic_model_to_schema(field_type)
+        nested_schema = pydantic_model_to_schema(field_type)
+        result = {
+            "type": "object"
+        }
+        if description:
+            result["description"] = description
+        result["properties"] = nested_schema.get("properties", {})
+        result["required"] = nested_schema.get("required", [])
+        return result
 
     elif field_type in (str, int, float, bool):
         type_map = {str: "string", int: "integer", float: "number", bool: "boolean"}
-        return {
-            "type": type_map[field_type],
-            "description": description,
-        }
+        result = {"type": type_map[field_type]}
+        if description:
+            result["description"] = description
+        return result
 
-    else:
-        # Default fallback
-        return {
-            "type": "string",
-            "description": description,
-        }
+    return {
+        "type": "string",
+        **({"description": description} if description else {})
+    }

@@ -81,11 +81,11 @@ Instructions:
 
 Example Output Format:
 {{
-  "Relevant Technical Header 1": {{"job_skills": [...], "candidate_skills": [...]}},
-  "Relevant Technical Header 2": {{"job_skills": [...], "candidate_skills": [...]}},
-  "Relevant Technical Header 3": {{"job_skills": [...], "candidate_skills": [...]}},
-  "Relevant Technical Header 4": {{"job_skills": [...], "candidate_skills": [...]}},
-  "Soft Skills": {{"job_skills": [...], "candidate_skills": [...]}} // Must be included with its data
+  "Relevant Technical Header 1": [...],
+  "Relevant Technical Header 2": [...],
+  "Relevant Technical Header 3": [...],
+  "Relevant Technical Header 4": [...],
+  "Soft Skills": [...] // Must be included with its data
 }}
 
 Output ONLY the valid JSON object.

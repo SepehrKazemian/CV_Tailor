@@ -41,6 +41,7 @@ class SkillHeaderSelector:
         input_vars = list(inputs.keys())
 
         try:
+            from resume_tailor.utils import llm_utils as lu
             result_str = run_llm_chain(
                 self.llm, prompt_template, input_vars, inputs, fail_softly=True
             )
@@ -122,15 +123,32 @@ class SkillHeaderSelector:
     def extract_json_block(self, text: str) -> str:
         """
         Extracts the first valid JSON object (between { and }) from any text.
+
+        Strips out:
+        - Markdown fences like ```json or ```
+        - Any text before the first opening '{'
+        
+        Raises:
+            ValueError: If no valid JSON object is found.
         """
         text = text.strip()
+
+        # Remove markdown code fences
         if text.startswith("```json"):
             text = text[7:]
         if text.endswith("```"):
             text = text[:-3]
+
+        # Remove any text before first {
+        first_curly = text.find('{')
+        if first_curly != -1:
+            text = text[first_curly:]
+
+        # Find and return first full JSON block
         match = re.search(r'\{[\s\S]+?\}', text)
         if match:
             return match.group(0)
+
         raise ValueError("No valid JSON block found in LLM output.")
 
 

@@ -6,7 +6,8 @@ from pydantic import BaseModel, Field, ValidationError
 
 from resume_tailor.utils.llm_provider import get_llm
 from resume_tailor.utils.llm_utils import run_llm_chain
-from resume_tailor.tailors.tailor_utils import SKILL_SECTION_HEADERS
+# Import utilities from tailor_utils
+from resume_tailor.tailors.tailor_utils import SKILL_SECTION_HEADERS, extract_json_block
 # Import necessary prompt templates
 from resume_tailor.utils.prompt_templates import (
     STEP1_EXTRACT_SKILLS_PROMPT,
@@ -18,24 +19,6 @@ logger = logging.getLogger(__name__)
 # Configure root logger if not already configured
 if not logging.getLogger().hasHandlers():
     logging.basicConfig(level=logging.INFO)
-
-# --- Utility Function ---
-def extract_json_block(text: str) -> Optional[str]:
-    """Extracts the first JSON block (between { and }) from a string."""
-    # Look for JSON starting with { and ending with }
-    # Handle potential markdown fences ```json ... ```
-    text = text.strip()
-    if text.startswith("```json"):
-        text = text[7:]
-    if text.endswith("```"):
-        text = text[:-3]
-    text = text.strip()
-
-    match = re.search(r'\{.*\}', text, re.DOTALL)
-    if match:
-        return match.group(0)
-    logger.warning("Could not find JSON block in text.")
-    return None
 
 # --- Pydantic Models ---
 class JudgeEvaluation(BaseModel):

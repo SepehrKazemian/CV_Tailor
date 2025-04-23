@@ -1,33 +1,24 @@
-•	LLM Ecosystem: OpenAI/Gemini API, LangChain, LlamaIndex, LangGraph, Retrieval-Augmented Generation (RAG), Vector DB, Embeddings, RAGAS, Lora, Transformers, Agents
-•	ML Tools & Frameworks: PyTorch, TensorFlow, scikit-learn, Boosting algorithms, Hugging Face, Classic NLP, Time-series modeling, Elasticsearch, MLflow
-•	Cloud & Infrastructure: GCP, Vertex AI, BigQuery, IAM & Security, GKE, Cloud Build, Cloud Run, Artifact Registry,
-                                                 Azure, AML, AKS, Functions, Cognitive Services, DevOps, Monitor
-                                                 AWS, SageMaker, Lambda, S3, EC2, CloudWatch, IAM, API Gateway
-•	Data Engineering: dbt, Spark, PostgreSQL, MySQL, BigQuery, Snowflake, Dagster, Pandas, ETL/ELT pipelines, Data Visualization, Databricks, Tableau
-•	Software & DevOps: Python, JavaScript, C, C++, Docker, Kubernetes, Github, Datadog, CI/CD Concepts, Azure DevOps  
-•	Soft Skills: Cross-functional communication, end-to-end ownership, leadership, mentorship, analytical thinking, rapid learning, team collaboration, Translating technical ideas to non-technical audiences, Systems thinking,  Creativity / innovative mindset
-•	LLM Tools & Practices: Langfuse, LLM-as-a-Judge, Chain-of-Thought Prompting, Hugging Face Inference API, Multi-query Expansion, Document Routing, Hallucination Detection
-•	Model Deployment & Observability: FastAPI, Azure App Service, Azure Functions, Redis Queue, Cron Jobs, Shadow Deployment, Human-in-the-Loop Pipelines
-•	Explainable AI & Evaluation: SHAP, Permutation Importance, RAGAS, Feedback-driven Online Training
-•	Document Intelligence: Tesseract, PyMuPDF, PDFMiner, Rule-based Regex NLP, OCR pipelines
-•	Probabilistic Forecasting: Quantile Regression, Prediction Intervals, Bayesian Neural Nets
-•	Synthetic Data & Augmentation: GANs for Imputation, Custom PII Data Generation
-•	Advanced Testing: Unit Tests, Integration Tests, Nested Cross-Validation, Backtesting
-•	Graph & Vector Systems: Knowledge Graphs, GraphDB, Qdrant, Azure Cognitive Search
-•	Explainability Tools: SHAP, Permutation Importance
-•	Probabilistic Modeling: Quantile Regression, Prediction Intervals, Bayesian NNs
-•	Synthetic Data Generation: GANs, custom PII synthesizer
-•	Dashboarding UX: Streamlit, Interactive forecasting/extraction interfaces
-•	Design Patterns & Testing: Shadow deployment, backtesting, nested cross-validation
-•	Automation: Cron Jobs, Airflow (orchestration), Dockerized training/inference pipelines
-•	Version Control & Experiment Tracking: MLflow, Hugging Face Trainer
-•	Graph Databases: Knowledge Graphs, GraphDB
-•	Streaming & Queues: Redis Queue
-•	Regex/NLP Tooling: Regex engines for structured field extraction, rule-based NLP
-•	PDF/Text Parsing: Tesseract, PyMuPDF, PDFMiner
-•	Model Serving & APIs: FastAPI, Azure App Service, Azure Functions
-•	Observability & Testing: Langfuse, Datadog, Unit testing, Integration testing, Shadow deployment
-•	Model Feedback Loops: Human-in-the-loop pipelines, Online training automation
-•	LLM Evaluation & Observability: Langfuse, LLM-as-a-Judge, Chain-of-Thought prompting
-•	LLM Deployment: Hugging Face Inference API, FastAPI
-•	LLM Architectures: Reranking, multi-query expansion, document routing, hallucination detection
+• LLM Architectures: Reranking, Multi-query Expansion, Document Routing, Hallucination Detection  
+• LLM: OpenAI API, Gemini API, LangChain, LlamaIndex, LangGraph, Retrieval-Augmented Generation, Vector DB, Embeddings, RAGAS, Lora, Transformers, Agents, Hugging Face Inference API  
+• LLM Evaluation: Langfuse, LLM-as-a-Judge, Chain-of-Thought Prompting, Feedback-driven Online Training  
+• LLM Deployment: FastAPI, Hugging Face Inference API, Azure App Service, Azure Functions  
+• Azure: Azure, AML, AKS, Functions, Cognitive Services, Azure App Service, Azure Functions, Azure DevOps  
+• AWS: SageMaker, Lambda, S3, EC2, CloudWatch, IAM, API Gateway  
+• GCP: Vertex AI, BigQuery, IAM & Security, GKE, Cloud Build, Cloud Run, Artifact Registry  
+• Python Ecosystem: Python, scikit-learn, PyTorch, TensorFlow, Hugging Face, Boosting algorithms, MLflow, Hugging Face Trainer  
+• Machine Learning: Time-series modeling, Quantile Regression, Prediction Intervals, Bayesian Neural Nets  
+• Data Engineering: dbt, Spark, PostgreSQL, MySQL, BigQuery, Snowflake, Dagster, Pandas, ETL, ELT, Databricks, Data Visualization, Tableau  
+• DevOps: Docker, Kubernetes, GitHub, Datadog, CI/CD, Cron Jobs, Airflow  
+• Monitoring: Datadog, Langfuse, Azure Monitor, CloudWatch  
+• Testing: Unit Tests, Integration Tests, Nested Cross-Validation, Backtesting  
+• Deployment: FastAPI, Docker, Azure App Service, Azure Functions, Redis Queue, Cron Jobs  
+• Streaming: Redis Queue  
+• Databases: PostgreSQL, MySQL, Redis, Vector DB, Elasticsearch, GraphDB  
+• Graph: Knowledge Graphs, GraphDB  
+• Parsing: Tesseract, PyMuPDF, PDFMiner  
+• Regex NLP: Rule-based NLP, Regex, Structured Field Extraction  
+• Classical NLP: Tokenization, Stemming, Lemmatization, Part-of-Speech Tagging, Named Entity Recognition  
+• Soft Skills: Cross-functional communication, End-to-end ownership, Leadership, Mentorship, Analytical thinking, Rapid learning, Team collaboration, Translating technical ideas to non-technical audiences, Systems thinking, Creativity, Innovation  
+• Dashboarding: Streamlit, Interactive Forecasting Interfaces  
+• Synthetic Data: GANs, Custom PII Data Generation  
+• Explainability: SHAP, Permutation Importance  
