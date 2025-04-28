@@ -6,6 +6,8 @@ from fuzzywuzzy import fuzz
 from sentence_transformers import SentenceTransformer
 import numpy as np
 from resume_tailor.tailors.skill_graph.skill_graph_llms import standardize_skills_llm
+from resume_tailor.tailors.skill_graph.standard_skill_matcher import StandardSkillMatcher
+import resume_tailor.tailors.skill_graph.skill_graph_config as sgc
 
 # Corrected absolute imports
 from resume_tailor.tailors.skill_graph.tag_matcher import StackOverflowTagger
@@ -55,6 +57,7 @@ class SkillPreprocessor:
         self.std_llm = None # Langchain wrapper (might not be needed if only using raw client)
         self.raw_client = None # Raw Anthropic client
         self.std_model_name = None
+        self.standard_matcher = StandardSkillMatcher(self.embedding_model, sgc.dataset_folder)
         try:
             # Get all return values from get_llm
             self.std_model_name, self.std_llm, self.raw_client = get_llm(
@@ -94,37 +97,37 @@ class SkillPreprocessor:
             logger.error(f"Failed to embed skills: {e}", exc_info=True)
             return embed_friendly_skills, None
 
-    def _get_so_matches_with_fuzzy(self, skills_to_embed: List[str], skill_vecs: np.ndarray) -> Dict[str, Dict]:
-        """Gets StackOverflow matches and adds fuzzy scores."""
-        if skill_vecs is None or len(skill_vecs) == 0:
-            return {}
+    def _get_matches_with_fuzzy(self, matches: Dict[str, List[str]]) -> Dict[str, Dict]:
+        """
+        Given matches {raw_skill: [matched_standard_skills]}, 
+        returns {raw_skill: {'original': [matches], 'fuzzy_scores': [scores]}}.
+        """
+        matches_ratio = {}  # 🛠 You missed this line
 
-        logger.info("Finding StackOverflow matches...")
-        matches = self.tagger.get_matches(skills_to_embed, skill_vecs)
-        logger.info(f"Found initial SO matches for {len(matches)} skills.")
-
-        # Add fuzzy matching scores
-        matches_ratio = {}
-        logger.info("Calculating fuzzy matching scores...")
-        for key, values in matches.items():
-            # Ensure values is treated as a list, even if tagger returns single string/None
-            original_values = values if isinstance(values, list) else ([values] if values else [])
-
-            if not original_values: # Handle cases where tagger found no match
-                 matches_ratio[key] = {
+        for raw_skill, matched_standards in matches.items():
+            if not matched_standards:
+                matches_ratio[raw_skill] = {
                     "original": [],
                     "fuzzy_scores": []
                 }
-                 continue
+                continue
 
-            norm_key = normalize_fuzzy(key)
-            fuzzy_scores = [fuzz.ratio(norm_key, normalize_fuzzy(value)) for value in original_values]
-            matches_ratio[key] = {
-                "original": original_values,
+            norm_raw = normalize_text(raw_skill)
+
+            fuzzy_scores = []
+            for standard_skill in matched_standards:
+                norm_standard = normalize_text(standard_skill)
+                score = fuzz.ratio(norm_raw, norm_standard)
+                fuzzy_scores.append(score)
+
+            matches_ratio[raw_skill] = {
+                "original": matched_standards,
                 "fuzzy_scores": fuzzy_scores
             }
+
         logger.info("Fuzzy matching complete.")
         return matches_ratio
+
 
     def _categorize_matches(self, matches_ratio: Dict[str, Dict], original_skill_map: Dict[str, str]) -> Tuple[Dict[str, str], Dict[str, List[str]], Dict[str, List[str]]]:
         """Categorizes matches into perfect fuzzy, other matches, and no matches."""
@@ -188,18 +191,11 @@ class SkillPreprocessor:
 
         logger.info(f"Starting preprocessing for {len(unique_raw_skills)} unique raw skills.")
 
-        # 1. Embed skills
-        original_skill_map, skill_vecs = self._embed_skills(unique_raw_skills)
-        # original_skill_map: {original_skill: embed_friendly_skill}
-        if skill_vecs is None:
-            logger.warning("Embedding failed. Returning raw unique skills as fallback.")
-            # Create a fallback map where original maps to itself
-            fallback_map = {s: s for s in unique_raw_skills}
-            return unique_raw_skills, fallback_map
+        matches = self.standard_matcher.match_skills(unique_raw_skills)
 
         # 2. Get SO Matches + Fuzzy Scores
         # Use the keys from original_skill_map (embed-friendly names) for matching
-        matches_ratio = self._get_so_matches_with_fuzzy(list(original_skill_map.values()), skill_vecs)
+        matches_ratio = self._get_matches_with_fuzzy(matches)
         # matches_ratio: {embed_friendly_skill: {"original": [so_tag], "fuzzy_scores": [score]}}
 
         # 3. Categorize Matches
@@ -208,8 +204,15 @@ class SkillPreprocessor:
         # needs_llm_standardization: {original_skill: [so_matches]}
 
         # 4. Standardize remaining with LLM
-        llm_standardized_semi_match_map = standardize_skills_llm(semi_match)
-        llm_standardized_no_match_map = standardize_skills_llm(no_match)
+        if semi_match:
+            llm_standardized_semi_match_map = standardize_skills_llm(semi_match, raw_client)
+        else:
+            llm_standardized_semi_match_map = {}
+        if no_match:
+            llm_standardized_no_match_map = standardize_skills_llm(no_match, raw_client)
+        else:
+            llm_standardized_no_match_map = {}
+            
         # llm_standardized_map: {original_skill: standardized_name} (standardized_name can be "" here)
 
         # 5. Combine results and create final mapping
@@ -217,56 +220,50 @@ class SkillPreprocessor:
         final_standardized_map_nullable: Dict[str, Optional[str]] = {}
         final_standardized_skills_set: Set[str] = set() # Only stores non-empty, standardized names
 
-        final_standardized_skills_set, final_standardized_map_nullable, soft_skills_list = _merge_standardized_map(
+        final_standardized_skills_set, final_standardized_map_nullable, soft_skills_list = self._merge_standardized_map_with_soft_skills(
             perfect_matches_map,
             llm_standardized_semi_match_map,
             llm_standardized_no_match_map
         )
-
-        _ensure_completeness(unique_raw_skills, final_standardized_map_nullable)
         
-        # TODO: Update stackoverflow tags and vecs with new standardized skills from LLM
-        # For next calls. this way we will see every variation of tags in no time and we
-        # can map without using LLM --> Cost efficient + deterministic tagging
+        self.standard_matcher.update_standards(final_standardized_map_nullable)
+        
+        return final_standardized_skills_set, final_standardized_map_nullable, soft_skills_list
 
-        return _finalize_standardization_output(
-            final_standardized_skills_set,
-            final_standardized_map_nullable,
-            soft_skills_list
-        )
-
-        def _merge_standardized_map_with_soft_skills(
+        # self._ensure_completeness(unique_raw_skills, final_standardized_map_nullable)
+        
+    def _merge_standardized_map_with_soft_skills(
             self,
             perfect_matches_map: dict,
             llm_standardized_semi_match_map: dict,
             llm_standardized_no_match_map: dict,
         ) -> tuple[set, dict, set]:
-            final_map = {}
-            final_set = set()
-            soft_skills = set()
+        final_map = {}
+        final_set = set()
+        soft_skills = set()
 
-            # Process perfect matches
-            for original, standardized in perfect_matches_map.items():
+        # Process perfect matches
+        for original, standardized in perfect_matches_map.items():
+            final_map[original] = standardized
+            final_set.add(standardized)
+
+        # Process semi matches
+        for original, standardized in llm_standardized_semi_match_map.items():
+            if len(standardized) == 0:
+                soft_skills.add(original)
+            else:
                 final_map[original] = standardized
                 final_set.add(standardized)
 
-            # Process semi matches
-            for original, standardized in llm_standardized_semi_match_map.items():
-                if len(standardized) == 0:
-                    soft_skills.add(original)
-                else:
-                    final_map[original] = standardized
-                    final_set.add(standardized)
+        # Process no matches
+        for original, standardized in llm_standardized_no_match_map.items():
+            if len(standardized) == 0:
+                soft_skills.add(original)
+            else:
+                final_map[original] = standardized
+                final_set.add(standardized)
 
-            # Process no matches
-            for original, standardized in llm_standardized_no_match_map.items():
-                if len(standardized) == 0:
-                    soft_skills.add(original)
-                else:
-                    final_map[original] = standardized
-                    final_set.add(standardized)
-
-            return final_set, final_map, soft_skills
+        return final_set, final_map, soft_skills
 
 
     def _ensure_completeness(

@@ -1,11 +1,17 @@
 # resume_tailor/tailors/skill_graph/candidate_skills.py
 import logging
-import hashlib
+# import hashlib # Removed
 from pathlib import Path
 from typing import List, Dict, Tuple, Optional, Set
 
+# Import the utility function for checking changes
+from resume_tailor.utils.check_changes_hash import check_file_changed
+# Import the new parsing utility function
+from resume_tailor.tailors.skills.skills_utils import parse_skills_file
 # Assuming SkillPreprocessor is in the same directory or adjust import
 from resume_tailor.tailors.skill_graph.skill_preprocessing import SkillPreprocessor
+from resume_tailor.tailors.skill_graph.skill_graph_llms import skill_domain_classifier
+
 
 logger = logging.getLogger(__name__)
 
@@ -28,80 +34,8 @@ class CandidateSkillProcessor:
         self.standardization_map: Dict[str, Optional[str]] = {}
         self._processed = False # Flag to track if processing has occurred
 
-    def _calculate_file_hash(self, filepath: Path) -> str:
-        """Calculates the SHA256 hash of a file's content."""
-        hasher = hashlib.sha256()
-        try:
-            with open(filepath, 'rb') as file:
-                while chunk := file.read(4096):
-                    hasher.update(chunk)
-            return hasher.hexdigest()
-        except FileNotFoundError:
-            logger.warning(f"File not found for hashing: {filepath}")
-            return ""
-        except Exception as e:
-            logger.error(f"Error calculating hash for {filepath}: {e}", exc_info=True)
-            return ""
-
-    def _check_file_changed(self) -> bool:
-        """Checks if the file content has changed since the last stored hash."""
-        if not self.skills_filepath.exists():
-            logger.warning(f"Skills file to check does not exist: {self.skills_filepath}")
-            # If file doesn't exist but hash does, consider it changed (to clear hash)
-            return self.hash_filepath.exists()
-
-        current_hash = self._calculate_file_hash(self.skills_filepath)
-        if not current_hash: return True # Treat hash error as change
-
-        stored_hash = ""
-        if self.hash_filepath.exists():
-            try:
-                with open(self.hash_filepath, 'r') as f:
-                    stored_hash = f.read().strip()
-            except Exception as e:
-                logger.error(f"Error reading hash file {self.hash_filepath}: {e}", exc_info=True)
-                return True # Treat read error as change
-
-        if current_hash != stored_hash:
-            logger.info(f"Change detected in {self.skills_filepath} (hash mismatch).")
-            try:
-                self.hash_filepath.parent.mkdir(parents=True, exist_ok=True)
-                with open(self.hash_filepath, 'w') as f:
-                    f.write(current_hash)
-                logger.info(f"Updated hash stored in {self.hash_filepath}")
-            except Exception as e:
-                 logger.error(f"Error writing hash file {self.hash_filepath}: {e}", exc_info=True)
-            return True
-        else:
-            logger.debug(f"No changes detected in {self.skills_filepath} based on hash.")
-            return False
-
-    def _parse_skills_file(self) -> List[str]:
-        """Parses skills from the file, handling potential formatting."""
-        skills = []
-        if not self.skills_filepath.exists():
-            logger.error(f"Skills file not found: {self.skills_filepath}")
-            return []
-        try:
-            with open(self.skills_filepath, 'r', encoding='utf-8') as f:
-                for line in f:
-                    line = line.strip()
-                    if not line: continue
-                    if line.startswith(('•', '*', '-', '+')):
-                        line = line[1:].strip()
-                    if ':' in line:
-                        parts = line.split(':', 1)
-                        # header = parts[0].strip() # Ignore header for now
-                        skill_part = parts[1].strip()
-                        skills.extend([s.strip() for s in skill_part.split(',') if s.strip()])
-                    else:
-                         skills.extend([s.strip() for s in line.split(',') if s.strip()])
-            unique_skills = sorted(list(set(s for s in skills if s))) # Ensure unique and non-empty
-            logger.info(f"Parsed {len(unique_skills)} unique raw skills from {self.skills_filepath}.")
-            return unique_skills
-        except Exception as e:
-            logger.error(f"Error parsing skills file {self.skills_filepath}: {e}", exc_info=True)
-            return []
+    # Removed _calculate_file_hash and _check_file_changed methods
+    # Removed _parse_skills_file method
 
     def process_skills(self, force_process: bool = False) -> None:
         """
@@ -110,27 +44,34 @@ class CandidateSkillProcessor:
         Args:
             force_process: If True, process the file even if the hash hasn't changed.
         """
-        file_changed = self._check_file_changed()
+        # Use the imported utility function here
+        file_changed = check_file_changed(self.skills_filepath, self.hash_filepath)
 
+        # Logic to decide whether to process based on change/force/processed flag
         if force_process or file_changed or not self._processed:
             logger.info(f"Processing candidate skills file: {self.skills_filepath} (Force: {force_process}, Changed: {file_changed}, FirstRun: {not self._processed})")
             self.raw_skills.clear()
             self.standardized_skills.clear()
             self.standardization_map.clear() # Clear the map on re-process
 
-            parsed_skills = self._parse_skills_file()
+            # Use the imported parse_skills_file utility
+            parsed_skills = parse_skills_file(self.skills_filepath)
             if parsed_skills:
                 self.raw_skills.update(parsed_skills)
                 # Run standardization
-                std_skills_list, current_map = self.preprocessor.run(parsed_skills)
+                std_skills_list, current_map = self.preprocessor.run(parsed_skills) # Assuming run returns list, map
                 self.standardized_skills.update(std_skills_list)
                 self.standardization_map = current_map # Store the latest map
                 logger.info(f"Stored {len(self.standardized_skills)} standardized candidate skills and {len(self.standardization_map)} mappings.")
+                self._processed = True # Mark as processed
             else:
                 logger.warning(f"Skill file {self.skills_filepath} was empty or could not be parsed. No candidate skills loaded.")
-            self._processed = True # Mark as processed
+                self._processed = True # Mark as processed even if empty to avoid reprocessing unless forced/changed
         else:
              logger.info(f"Skipping processing of {self.skills_filepath} as it hasn't changed and has already been processed.")
+
+        # This method doesn't need to return these values directly anymore
+        # return std_skills_list, current_map, soft_skills # Removed return
 
     def get_skills(self, force_process: bool = False) -> Tuple[Set[str], Set[str], Dict[str, Optional[str]]]:
         """
@@ -145,6 +86,12 @@ class CandidateSkillProcessor:
             - Set of standardized skills.
             - Dictionary mapping raw skills to standardized skills (or None).
         """
+        # Ensure processing has happened if needed
         if not self._processed or force_process:
-            self.process_skills(force_process=force_process)
+             # Call process_skills which now handles the check internally
+             self.process_skills(force_process=force_process)
+
         return self.raw_skills, self.standardized_skills, self.standardization_map
+
+
+

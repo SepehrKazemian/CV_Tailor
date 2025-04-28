@@ -29,7 +29,7 @@ INITIAL_L3_DOMAINS = [
     "NLP", "Computer Vision", "Cloud Computing", "DevOps", "MLOps", "Data Engineering",
     "Cybersecurity", "Web Development", "Mobile Development", "Database Management",
     "Business Intelligence", "Project Management", "Cognitive Skills", "Leadership",
-    "Communication", "Music", "Computer Science", "Information Retrieval"
+    "Communication", "Computer Science", "Information Retrieval"
 ]
 INITIAL_L2_CATEGORIES = {
     "Programming Languages": "Software Engineering", "Web Frameworks": "Software Engineering",

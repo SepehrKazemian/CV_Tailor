@@ -25,6 +25,7 @@ class StackOverflowTagger:
         """Loads the embedding model and tag data."""
         try:
             logger.info(f"Loading Stack Overflow tag data...")
+            # TODO: should be replaced with standardized tags later
             tag_set, tag_counts = parse_stackoverflow_tags() # Assuming this returns dict {tag: count}
             if not tag_counts:
                 raise ValueError("Failed to parse Stack Overflow tags.")
